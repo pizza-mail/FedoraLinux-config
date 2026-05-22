@@ -31,7 +31,7 @@ sudo dnf install -y \
     wget
 
 # 5. Swap to full ffmpeg (best quality)
-sudo dnf swap -y --allowerasing ffmpeg-free ffmpeg
+sudo dnf swap -y --allowerasing ffmpeg-free ffmpeg || sudo dnf install -y ffmpeg
 
 # 6. Update multimedia and sound groups
 sudo dnf groupupdate -y multimedia --setopt="install_weak_deps=False" \
@@ -42,6 +42,8 @@ sudo dnf install -y pipewire-jack-audio-connection-kit
 sudo dnf groupupdate -y sound-and-video
 
 # 7. Game launchers + prerequisite 
+
+sudo dnf install dnf-plugins-core -y
 
 sudo dnf install -y mesa-vulkan-drivers mesa-vulkan-drivers.i386 vulkan-tools
 
@@ -90,8 +92,6 @@ sudo grubby --update-kernel=ALL --args="drm.edid_firmware=HDMI-A-1:edid/edid-mod
 sudo dracut --force --verbose
 
 # 10. Brave Origin
-
-sudo dnf install dnf-plugins-core -y
 
 sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-nightly.s3.brave.com/brave-browser-nightly.repo
 
