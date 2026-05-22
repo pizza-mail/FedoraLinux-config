@@ -156,7 +156,7 @@ sudo dnf remove -y libreoffice*
 sudo dnf autoremove -y
 sudo dnf clean all
 
-#14. Clipboard
+#15. Clipboard
 gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Ctrl>bracketleft']"
 
 sudo dnf install libgda libgda-sqlite gsound -y
