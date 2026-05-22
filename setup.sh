@@ -4,64 +4,93 @@ set -e
 trap 'echo "ERROR on line $LINENO. Press Enter to exit."; read' ERR
 
 # 1. Enable parallel downloads and update
-
 echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf
 
 sudo dnf update -y
 
-# 2. Add RPM Fusion repos (free + nonfree)
+# 2. Add RPM Fusion repos + other repos
 sudo dnf install -y \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
+sudo dnf install dnf-plugins-core -y
+
 # 3. Enable Cisco OpenH264 repo
 sudo dnf config-manager setopt fedora-cisco-openh264.enabled=1
 
-# 4. Install useful packages + appstream data in one transaction
+# 4. Install system packages, codecs, and explicit python dependencies
 sudo dnf install -y \
+    git \
+    make \
+    scdoc \
+    python3-build \
+    python3-hatchling \
+    python3-installer \
+    python3-pip \
+    python3-filelock \
+    python3-packaging \
     rpmfusion-*-appstream-data \
     libavcodec-freeworld \
-    umu-launcher \
     bubblewrap \
     python3-gobject \
     python3-requests \
     python3-pillow \
-    p7zip \
-    p7zip-plugins \
+    7zip \
     wget
 
-# 5. Swap to full ffmpeg (best quality)
+# 5. Umu-launcher Build & Native Setup
+pushd /tmp > /dev/null
+
+rm -rf umu-launcher
+
+git clone https://github.com/Open-Wine-Components/umu-launcher.git
+  
+pushd umu-launcher > /dev/null
+
+python3 -m build --wheel --no-isolation
+
+sudo python3 -m pip install dist/*.whl --break-system-packages
+
+popd > /dev/null
+
+rm -rf umu-launcher
+
+popd > /dev/null
+
+
+# 6. Swap to full ffmpeg (best quality)
 sudo dnf swap -y --allowerasing ffmpeg-free ffmpeg || sudo dnf install -y ffmpeg
 
-# 6. Update multimedia and sound groups
-sudo dnf groupupdate -y multimedia --setopt="install_weak_deps=False" \
-    --exclude=PackageKit-gstreamer-plugin
+# 7. Update multimedia and sound groups
+sudo dnf group upgrade -y multimedia --setopt="install_weak_deps=False" \
+    --exclude=PackageKit-gstreamer-plugin --skip-unavailable
 
 sudo dnf install -y pipewire-jack-audio-connection-kit
 
-sudo dnf groupupdate -y sound-and-video
+sudo dnf group upgrade -y sound-and-video --skip-unavailable
 
-# 7. Game launchers + prerequisite 
+amixer -D hw:Generic_1 sset "Auto-Mute Mode" Disabled
 
-sudo dnf install dnf-plugins-core -y
+sudo alsactl store
 
-sudo dnf install -y mesa-vulkan-drivers mesa-vulkan-drivers.i386 vulkan-tools
+# 8. Game launchers + prerequisite 
+sudo dnf install -y mesa-vulkan-drivers mesa-vulkan-drivers.i686 vulkan-tools
 
 sudo dnf install steam -y
 
 sudo dnf -y copr enable faugus/faugus-launcher
 sudo dnf -y install faugus-launcher
 
-# 8. Flatpak and flatpak apps
+# 9. Flatpak and flatpak apps
+flatpak remote-delete --force flathub || true
 
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 flatpak install flathub dev.vencord.Vesktop -y
 
 flatpak install flathub eu.betterbird.Betterbird -y
 
-# 9. Dual-monitor nightight fix ( rare case for my hardware ) 
-
+# 10. Dual-monitor nightight fix ( rare case for my hardware ) 
 sudo mkdir -p /usr/lib/firmware/edid
  
 sudo cp /sys/class/drm/card*-HDMI-A-1/edid /usr/lib/firmware/edid/edid-mod.bin
@@ -91,22 +120,19 @@ sudo grubby --update-kernel=ALL --args="drm.edid_firmware=HDMI-A-1:edid/edid-mod
  
 sudo dracut --force --verbose
 
-# 10. Brave Origin
-
+# 11. Brave Origin
 sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-nightly.s3.brave.com/brave-browser-nightly.repo
 
 sudo dnf install brave-origin-nightly -y
 
-# 11. Enable custom volume keys
-
+# 12. Enable custom volume keys
 gsettings set org.gnome.settings-daemon.plugins.media-keys volume-up "['Page_Up']"
 
 gsettings set org.gnome.settings-daemon.plugins.media-keys volume-down "['Page_Down']"
 
 gsettings set org.gnome.settings-daemon.plugins.media-keys volume-mute "['End']"
 
-# 12. Kernel optimizations
-
+# 13. Kernel optimizations
 if ! sudo grep -q "^vm.swappiness=" /etc/sysctl.d/99-sysctl.conf; then
     echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.d/99-sysctl.conf
 else
@@ -121,8 +147,7 @@ fi
 
 sudo sysctl --system
 
-# 13. System debloat
-
+# 14. System debloat
 sudo dnf remove -y \
     firefox firefox-langpacks \
     libreoffice* \
