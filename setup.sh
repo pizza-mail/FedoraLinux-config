@@ -148,17 +148,8 @@ fi
 sudo sysctl --system
 
 # 14. System debloat
-sudo dnf remove -y \
-    firefox firefox-langpacks \
-    libreoffice* \
-    gnome-boxes \
-    gnome-tour \
-    cheese \
-    gnome-weather \
-    gnome-maps \
-    gnome-characters \
-    simple-scan \
-    gnome-font-viewer
+sudo dnf remove -y firefox firefox-langpacks
+sudo dnf remove -y libreoffice*
     
 sudo dnf autoremove -y
 
