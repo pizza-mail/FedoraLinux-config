@@ -13,5 +13,5 @@ Run it:
 
 ./setup.sh or sudo ./setup.sh
 
+<img width="1337" height="835" alt="image" src="https://github.com/user-attachments/assets/cc3ac43d-a9d9-4dad-b5a6-d9677174d217" />
 
-<img width="1337" height="835" alt="image" src="https://github.com/user-attachments/assets/303374f4-b5f5-4e02-8167-85b4f3797cf5" />
