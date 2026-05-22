@@ -153,6 +153,23 @@ sudo dnf remove -y libreoffice*
     
 sudo dnf autoremove -y
 
+#14. Clipboard
+
+gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Ctrl>bracketleft']"
+
+sudo dnf install libgda libgda-sqlite gsound -y
+
+curl -L https://github.com/boerdereinar/copyous/releases/latest/download/copyous@boerdereinar.dev.zip -o /tmp/copyous.zip
+
+mkdir -p ~/.local/share/gnome-shell/extensions/copyous@boerdereinar.dev
+
+unzip -o /tmp/copyous.zip -d ~/.local/share/gnome-shell/extensions/copyous@boerdereinar.dev/
+
+rm /tmp/copyous.zip
+
 echo "Setup complete! Please restart your computer to apply all changes."
+
+# Note to self, run this after the restart is done.
+# gnome-extensions enable copyous@boerdereinar.dev
 
 
