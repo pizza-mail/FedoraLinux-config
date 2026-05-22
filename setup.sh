@@ -90,6 +90,8 @@ flatpak install flathub dev.vencord.Vesktop -y
 
 flatpak install flathub eu.betterbird.Betterbird -y
 
+flatpak uninstall --unused
+
 # 10. Dual-monitor nightight fix ( rare case for my hardware ) 
 sudo mkdir -p /usr/lib/firmware/edid
  
@@ -152,9 +154,9 @@ sudo dnf remove -y firefox firefox-langpacks
 sudo dnf remove -y libreoffice*
     
 sudo dnf autoremove -y
+sudo dnf clean all
 
 #14. Clipboard
-
 gsettings set org.gnome.shell.keybindings show-screenshot-ui "['<Ctrl>bracketleft']"
 
 sudo dnf install libgda libgda-sqlite gsound -y
